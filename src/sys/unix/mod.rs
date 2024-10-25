@@ -1,4 +1,5 @@
 use cfg_if::cfg_if;
+use fs2::FileExt;
 use std::io::{IoSlice, IoSliceMut};
 use std::os::raw::c_int;
 use std::os::unix::io::AsRawFd;
@@ -115,12 +116,15 @@ cfg_if! {
 impl SerialPort {
 	pub fn open(path: &Path) -> std::io::Result<Self> {
 		use std::os::unix::fs::OpenOptionsExt;
+		let custom_flags = libc::O_NONBLOCK | libc::O_NOCTTY;
 		let file = std::fs::OpenOptions::new()
 			.read(true)
 			.write(true)
 			.create(false)
-			.custom_flags(libc::O_NONBLOCK | libc::O_NOCTTY)
+			.custom_flags(custom_flags)
 			.open(path)?;
+
+		file.try_lock_exclusive()?;
 
 		Ok(Self::from_file(file))
 	}
