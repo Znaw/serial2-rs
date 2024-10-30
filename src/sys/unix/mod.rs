@@ -172,8 +172,9 @@ impl SerialPort {
 		let (settings, baud_rate) = {
 			let baud_rate = settings.termios.c_ospeed;
 			let mut settings = settings.clone();
-			settings.termios.c_ispeed = 9600;
-			settings.termios.c_ospeed = 9600;
+			settings.termios.c_ispeed = 115200;
+			settings.termios.c_ospeed = 115200;
+			settings.termios.c_cflag |= libc::CREAD | libc::CLOCAL;
 			(settings, baud_rate)
 		};
 		#[cfg(any(target_os = "ios", target_os = "macos"))]
